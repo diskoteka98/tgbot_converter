@@ -1,2 +1,9 @@
-/django_telegrambot_converter/django_telegrambot_converter/local.py
+django_telegrambot_converter/django_telegrambot_converter/local.py
 .idea
+staticfiles/
+*.pyc
+__pycache__/
+venv/
+env/
+*/migrations/*
+*.sqlite3

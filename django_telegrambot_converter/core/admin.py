@@ -1,18 +1,45 @@
 from django.contrib import admin
-from .models import Profile
-from .models import Message
+from .models import User, Message
+from simple_history.admin import SimpleHistoryAdmin
 
 
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('external_id', 'name')
-    search_fields = ('name', 'external_id')
+class MessageInline(admin.TabularInline):
+    model = Message
+    extra = 0
+    readonly_fields = ('text', 'created_at')
+    can_delete = False
+    ordering = ['-created_at']
+
+
+@admin.register(User)
+class UserAdmin(SimpleHistoryAdmin):
+    inlines = [MessageInline]
+    list_display = ('telegram_id', 'username', 'message_count')
+    search_fields = ('username', 'telegram_id')
+    list_display_links = ['username', "telegram_id"]
+
+    def message_count(self, obj):
+        return obj.message_set.count()  # Возвращаем количество сообщений, связанных с пользователем
+
+    message_count.short_description = 'Количество сообщений'  # Название колонки в списке пользователей
 
 
 @admin.register(Message)
-class MessageAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'username', 'text', 'created_at')
-    search_fields = ('username', 'text')
-    list_filter = ('created_at',)
+class MessageAdmin(SimpleHistoryAdmin):
+    list_display = ('get_username', 'profile', 'text', 'created_at')
+    search_fields = ('profile__username', 'text')
+    list_display_links = ['profile', 'created_at']
+    ordering = ['-created_at']
+    list_per_page = 10
+    list_filter = ('created_at', 'profile')
+
+    def get_username(self, obj):
+        return obj.profile.username if obj.profile else 'Неизвестный пользователь'
+
+    get_username.short_description = 'Username'
+
+
+
+
 
 

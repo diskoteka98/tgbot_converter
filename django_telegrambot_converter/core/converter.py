@@ -1,34 +1,11 @@
+from typing import Any
+
 import requests
 import datetime
 import sqlite3
 from django.conf import settings
-
-
-def get_rate_from_db(currency_from, currency_to):
-
-    date = datetime.date.today()
-    conn = sqlite3.connect("converter.sql")
-    cur = conn.cursor()
-    cur.execute("SELECT rate FROM rates WHERE currency_from = ? and currency_to = ? and date = ?", (currency_from, currency_to, date))
-    row = cur.fetchone()
-    if row is None:
-        return None
-    print("db_work")
-    return row[0]
-
-
-def save_rates_to_db(rates, currency_from):
-    date = datetime.date.today()
-    conn = sqlite3.connect("converter.sql")
-    cur = conn.cursor()
-    new_rows = []
-    for currency_to in rates:
-        new_rows.append([currency_to, currency_from, str(date), rates[currency_to]])
-
-    cur.executemany("INSERT INTO rates (currency_to, currency_from, date, rate) VALUES ( ?, ?, ?, ?)", new_rows)
-    conn.commit()
-    cur.close()
-    conn.close()
+from core.models import Rate
+from decimal import Decimal
 
 
 def get_rates_from_api(currency_from):
@@ -40,14 +17,42 @@ def get_rates_from_api(currency_from):
     return rates
 
 
+def save_rates_to_db(rates, currency_from):
+    date = datetime.date.today()
+
+    new_rates = []
+    for currency_to, rate in rates.items():
+        new_rates.append(
+            Rate(
+                currency_from=currency_from,
+                currency_to=currency_to,
+                date=date,
+                rate=Decimal(rate)
+            )
+        )
+
+    Rate.objects.bulk_create(new_rates)
+
+
+def get_rate_from_db(currency_from: str, currency_to: str) -> Decimal | None:
+
+    date = datetime.date.today()
+    try:
+        rate = Rate.objects.get(currency_from=currency_from, currency_to=currency_to, date=date)
+    except Rate.DoesNotExist:
+        return None
+    return rate.rate
+
+
 def convert(currency_from, currency_to, amount):
     currency_from = str(currency_from).upper()
     currency_to = str(currency_to).upper()
     rate = get_rate_from_db(currency_from, currency_to)
     if not rate:
         rates = get_rates_from_api(currency_from)
+        save_rates_to_db(rates, currency_from)
         rate = rates[currency_to]
     return amount * rate
 
-amount = 0
+
 

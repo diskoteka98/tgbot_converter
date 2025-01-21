@@ -1,0 +1,14 @@
+services:
+  web:
+    build:
+      context: .
+    volumes:
+      - ./django_telegrambot_converter/:/app
+    ports:
+      - 8080:8080
+  bot:
+    build:
+      context: .
+    volumes:
+      - ./django_telegrambot_converter/:/app
+    command: "python manage.py start_bot"
