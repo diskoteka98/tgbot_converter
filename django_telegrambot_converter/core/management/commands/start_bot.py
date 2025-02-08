@@ -48,6 +48,7 @@ def go(message):
 
 def summa(message):
     global amount
+    print(int(message.text.strip()))
     try:
         amount = int(message.text.strip())
     except ValueError:

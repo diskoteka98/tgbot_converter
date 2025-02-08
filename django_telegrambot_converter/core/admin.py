@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Message
+from .models import User, Message, Currency, Rate
 from simple_history.admin import SimpleHistoryAdmin
 
 
@@ -39,7 +39,16 @@ class MessageAdmin(SimpleHistoryAdmin):
     get_username.short_description = 'Username'
 
 
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'symbol')
+    search_fields = ('name', 'symbol')
 
 
+@admin.register(Rate)
+class RateAdmin(admin.ModelAdmin):
+    list_display = ['currency_from', 'currency_to', 'rate', 'date']
+    list_filter = ['currency_from', 'currency_to', 'date']
+    search_fields = ['currency_from__name', 'currency_to__name']
 
 

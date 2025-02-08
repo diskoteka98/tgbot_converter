@@ -23,10 +23,18 @@ class Message(models.Model):
         return f"Сообщения {self.pk} от {self.profile}"
 
 
+class Currency(models.Model):
+    name = models.CharField(max_length=3, unique=True)
+    symbol = models.CharField(max_length=10, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Rate(models.Model):
     date = models.DateField()
-    currency_from = models.CharField(max_length=3)
-    currency_to = models.CharField(max_length=3)
+    currency_from = models.ForeignKey('Currency', on_delete=models.CASCADE, related_name='rates_from')
+    currency_to = models.ForeignKey('Currency', on_delete=models.CASCADE, related_name='rates_to')
     rate = models.DecimalField(max_digits=10, decimal_places=5)
 
     class Meta:
