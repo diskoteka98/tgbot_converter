@@ -66,3 +66,6 @@ print('hello ')
 
 print('hello')
 
+
+def ff():
+    pass
