@@ -21,15 +21,12 @@ def get_rates_from_api(currency_from):
 def save_rates_to_db(rates, currency_from_name):
     date = datetime.date.today()
 
-    currency_from, created = Currency.objects.get_or_create(name=currency_from_name)
-    if created:
-        print(f"Currency {currency_from_name} created.")
+    currency_from = Currency.objects.get(name=currency_from_name)
 
     new_rates = []
     for currency_to_name, rate in rates.items():
         currency_to, created = Currency.objects.get_or_create(name=currency_to_name)
-        if created:
-            print(f"Currency {currency_to_name} created.")
+
 
         new_rates.append(
             Rate(
