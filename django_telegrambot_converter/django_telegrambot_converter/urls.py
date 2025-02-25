@@ -18,8 +18,12 @@ from django.contrib import admin
 
 from django.urls import path
 
+from core.views import CurrencyList, RateList
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/currencies/', CurrencyList.as_view(), name='currency-list'),
+    path('api/rates/', RateList.as_view(), name='rate-list'),
 
 
 

@@ -1,20 +1,19 @@
-# from django.http import JsonResponse
-# from .tasks import task_get_rates_from_api
-# from celery.result import AsyncResult
-#
-#
-# def update_rates_and_get_status(request):
-#     task = task_get_rates_from_api.delay()
-#
-#     check_status_task = check_task_status.delay(task.id)
-#
-#     return JsonResponse({'task_id': task.id, 'check_status_task_id': check_status_task.id})
-#
-#
-# def get_task_status(request, task_id):
-#     result = AsyncResult(task_id)
-#     return JsonResponse({
-#         'task_id': task_id,
-#         'status': result.status,
-#         'result': result.result
-#     })
+
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
+from .models import Currency, Rate
+from core.serializer import CurrencySerializer, RateSerializer
+from .permissions import IsRaman
+
+
+class CurrencyList(generics.ListAPIView):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+    permission_classes = [IsRaman ,]
+
+
+class RateList(generics.ListAPIView):
+    queryset = Rate.objects.all()
+    serializer_class = RateSerializer
+    permission_classes = [IsRaman, ]
